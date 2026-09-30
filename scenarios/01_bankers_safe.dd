@@ -1,0 +1,41 @@
+# Scenario 01: Classic Banker's Algorithm Safe State Execution
+# Silberschatz Benchmark Configuration
+
+MODE avoidance
+PREVENTION none
+VICTIM_POLICY cheapest
+
+# Define Resources (Total instances)
+RESOURCE A 10
+RESOURCE B 5
+RESOURCE C 7
+
+# Define Processes (Priority, CostWeight)
+PROCESS P0 1 1.0
+PROCESS P1 2 2.0
+PROCESS P2 3 1.5
+PROCESS P3 4 3.0
+PROCESS P4 5 2.5
+
+# Max Claims
+CLAIM P0 7 5 3
+CLAIM P1 3 2 2
+CLAIM P2 9 0 2
+CLAIM P3 2 2 2
+CLAIM P4 4 3 3
+
+# Initial Allocations
+REQUEST P0 0 1 0
+REQUEST P1 2 0 0
+REQUEST P2 3 0 2
+REQUEST P3 2 1 1
+REQUEST P4 0 0 2
+
+PRINT_STATE
+CHECK_SAFETY
+
+# Process P1 requests (1, 0, 2) - should be safely granted
+REQUEST P1 1 0 2
+
+PRINT_STATE
+CHECK_SAFETY

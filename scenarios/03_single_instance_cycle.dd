@@ -1,0 +1,37 @@
+# Scenario 03: Single-Instance Circular Wait Deadlock Detection & Recovery
+MODE detection
+PREVENTION none
+VICTIM_POLICY cheapest
+
+RESOURCE LockA 1
+RESOURCE LockB 1
+RESOURCE LockC 1
+
+PROCESS Worker1 1 10.0
+PROCESS Worker2 2 5.0
+PROCESS Worker3 3 1.0
+
+CLAIM Worker1 1 1 0
+CLAIM Worker2 0 1 1
+CLAIM Worker3 1 0 1
+
+# Step 1: Each process acquires 1 lock
+REQUEST Worker1 1 0 0
+REQUEST Worker2 0 1 0
+REQUEST Worker3 0 0 1
+
+PRINT_STATE
+
+# Step 2: Each process requests the next lock (creating circular cycle: W1 -> LockB -> W2 -> LockC -> W3 -> LockA -> W1)
+REQUEST Worker1 0 1 0
+REQUEST Worker2 0 0 1
+REQUEST Worker3 1 0 0
+
+PRINT_STATE
+CHECK_DEADLOCK
+
+# Recover by aborting the lowest cost victim (Worker3)
+RECOVER
+
+PRINT_STATE
+CHECK_DEADLOCK

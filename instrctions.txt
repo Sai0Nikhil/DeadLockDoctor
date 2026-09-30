@@ -1,0 +1,38 @@
+Dear students 
+This is the OS capstone project internal review -1 pattern and rubrics
+Each team must prepare for presentation along with partial or full project implementation 
+
+1. Project identification
+-Use case selected from the approved 25 use cases
+-Project title
+-Team members – 3 students
+-Problem statement - 5m 
+-Objectives
+-Scope
+2. Requirements - 10 m
+-Functional requirements
+-Non-functional requirements
+-Input/output requirements
+-Hardware/software requirements, wherever applicable
+3. Design - 10 m 
+-Overall system architecture
+-Module/block diagram
+-Data flow/workflow
+-Database design, if applicable
+-Technologies/tools selected
+4. Working environment - 10 m 
+-Ubuntu/WSL setup
+-Required libraries/software installed
+-Git/GitHub repository, if applicable
+-Project folder/code structure
+5. Working prototype - 10 m 
+-Basic application/program should run
+-Initial functionality should be demonstrated
+-At least Core Module-I should be implemented
+6. Documentation - 10 m
+-Problem statement
+-Objectives
+-Requirements
+-Architecture/design
+-Initial implementation screenshots/results
+-Individual contribution

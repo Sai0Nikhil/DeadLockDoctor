@@ -1,0 +1,35 @@
+# Scenario 04: Multi-Instance Resource Reduction Matrix Deadlock
+MODE detection
+PREVENTION none
+VICTIM_POLICY fewest
+
+RESOURCE Disk 2
+RESOURCE GPU 1
+RESOURCE Net 1
+
+PROCESS DB_Proc 3 20.0
+PROCESS AI_Model 2 15.0
+PROCESS Backup_Daemon 1 2.0
+
+CLAIM DB_Proc 1 1 0
+CLAIM AI_Model 1 1 1
+CLAIM Backup_Daemon 2 0 1
+
+REQUEST DB_Proc 1 0 0
+REQUEST AI_Model 0 1 0
+REQUEST Backup_Daemon 1 0 0
+
+PRINT_STATE
+
+# Deadlocking requests
+REQUEST DB_Proc 0 1 0
+REQUEST AI_Model 0 0 1
+REQUEST Backup_Daemon 1 0 0
+
+PRINT_STATE
+CHECK_DEADLOCK
+
+RECOVER
+
+PRINT_STATE
+CHECK_DEADLOCK

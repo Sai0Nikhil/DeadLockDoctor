@@ -1,0 +1,58 @@
+DeadlockDoctor — a resource &amp; deadlock manager
+Model who holds and who waits, then detect cycles, run the Banker’s check, and break the tie.
+
+Core
+Linux · C11
+Concurrency
+Processes
+Scheduling
+Specification
+Must build (core spec)
+A resource manager where processes request/hold/release typed, multi-instance resources.
+Deadlock detection: build the wait-for graph and detect cycles; report the deadlocked set.
+Deadlock avoidance: the Banker’s algorithm safety check on each request.
+A driver that replays a scenario file and shows grants, blocks, and any deadlock.
+Should build
+Deadlock recovery by victim selection (abort/rollback the cheapest process to break the cycle).
+A live text visualization of the resource-allocation graph as requests arrive.
+A real demonstration: threads acquiring locks in conflicting orders, detected by the manager.
+Stretch goals
+Prevention strategies (ordered resources / all-or-nothing) with a comparison of trade-offs.
+Timeout-based detection tuned against false positives.
+How to solve it
+The model. Represent Allocation, Max, Need, and Available matrices plus a request queue. A request is granted only if it keeps the system in a safe state; otherwise the requester blocks. This is the Week 11 coordination material implemented as a working service, not a worked example.
+
+Detection vs avoidance. Detection runs periodically or on block: construct the wait-for graph (project the RAG by resolving assignment/request edges) and DFS for a cycle. Avoidance is proactive: the Banker’s safety algorithm simulates whether all processes can still finish before granting.
+
+Recovery and a real demo. On a detected cycle, pick a victim by a cost function, release its resources, and re-run the safety check. Then tie it to reality: spawn threads that grab pthread mutexes in opposing orders and have the manager observe and report the deadlock the course visualizes in Week 11.
+
+Core syscalls / APIs pthreads (for the live demo), matrix algorithms, graph DFS, pthread_mutex_trylock for observation
+Sync with the 12-week syllabus
+The team ships an increment every week, applying that week's OS concept to the project — the same cadence and abstractions the class covers.
+
+Wk	Course focus that week	What this team builds
+W1	Syscall boundary · user vs kernel mode · REPL & repo setup	Repo + the resource/allocation model and a single-instance cycle detector.
+W2	C toolchain · memory model · stack, heap & the linker · dynamic data types	Matrix and graph data structures with clear ownership; the memory-model week.
+W3	Lexing & parsing · the process/session table · console & UART I/O	A scenario-file parser (requests/releases over time) and the process/resource tables.
+W4	Processes · fork / exec / wait · CPU scheduling policies	Map processes to real OS processes/threads; a scheduler of pending requests.
+W5	exec & PATH resolution · built-ins · exit status · ELF loading	Named resource types and per-process claims plumbed through request handling.
+W6	Signals · asynchronous control · timer interrupts & alarms	Handle async request arrival on a timer; robust blocking of unsafe requests.
+W7	Pipes & file descriptors · dup2 · producer/consumer plumbing · sleep/wakeup	A pipe/queue feeding requests to the manager (producer/consumer of requests).
+W8	Virtual memory · page tables · copy-on-write · leak-free memory discipline	ASan-clean under churn; no leaks as processes come and go.
+W9	Files · descriptors · redirection · inodes & on-disk layout	Persist and replay allocation histories from file; log every grant/block/deadlock.
+W10	Threads · mutual exclusion · race conditions · context switch · parallel speedup	The core: multi-instance detection, the Banker’s safety check, and a live threaded deadlock demo.
+W11	Semaphores · deadlock · coordination · job & lifecycle control	Recovery via victim selection; prove no false deadlocks and correct safe/unsafe verdicts.
+W12	Integration · packaging & hosting · test battery · demo & viva	Package, run the detection/avoidance battery, visualize the RAG, write the design doc.
+Final deliverables
+The deadlockdoctor manager, a scenario runner, and the live-thread demo.
+A test suite of safe/unsafe scenarios with expected verdicts and detected sets.
+A design doc on detection, the Banker’s algorithm, and recovery.
+A comparison of avoidance vs detection vs prevention with trade-offs.
+Evaluation & acceptance
+Graded on the common rubric below. A submission passes when it clears these project-specific acceptance tests, demonstrated live in the Week-12 viva:
+
+A crafted circular-wait scenario is detected and the exact deadlocked set reported.
+The Banker’s check grants safe requests and blocks unsafe ones correctly.
+Two threads locking in opposing orders are caught by the live demo.
+A safe interleaving runs to completion with no false deadlock flagged.
+Distinction bar. A working recovery path that breaks a real thread deadlock by victim selection, plus a correct multi-instance detector with no false positives under stress.

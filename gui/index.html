@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadlockDoctor - OS Capstone Resource & Deadlock Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+    <div class="app-container">
+        <!-- TOP NAVIGATION & STATUS BAR -->
+        <header class="top-nav">
+            <div class="logo-section">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>DEADLOCK<span>DOCTOR</span></h1>
+                    <p class="subtitle">OS Capstone Engine • Use Case #11</p>
+                </div>
+            </div>
+
+            <div class="system-status-badge" id="systemStatusBadge">
+                <span class="status-indicator safe" id="statusDot"></span>
+                <span class="status-text" id="statusText">SYSTEM STATUS: SAFE</span>
+            </div>
+
+            <div class="top-controls">
+                <div class="mode-selector">
+                    <label>Engine Mode:</label>
+                    <select id="operatingModeSelect">
+                        <option value="avoidance" selected>Avoidance (Banker's Algorithm)</option>
+                        <option value="detection">Detection & Recovery (WFG/Reduction)</option>
+                        <option value="prevention">Prevention (Resource Ordering)</option>
+                    </select>
+                </div>
+                <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Toggle Light/Dark Theme">🌓 Theme</button>
+                <button class="btn btn-secondary" id="btnResetSystem">🔄 Reset</button>
+                <button class="btn btn-primary" id="btnRunPthreadDemo">⚡ Live Mutex Race</button>
+            </div>
+        </header>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="main-layout">
+            <!-- LEFT PANEL: GRAPH VISUALIZATION & TOPOLOGY -->
+            <section class="panel graph-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">🕸️</span>
+                        <h2>Resource Allocation Graph (RAG) & Wait-For Topology</h2>
+                    </div>
+                    <div class="graph-toggle-group">
+                        <button class="toggle-btn active" id="btnViewRAG">RAG View</button>
+                        <button class="toggle-btn" id="btnViewWFG">WFG View</button>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <svg id="graphSvg" class="graph-svg"></svg>
+                    <div class="graph-legend">
+                        <div class="legend-item"><span class="legend-box process-box"></span> Process (Circle)</div>
+                        <div class="legend-item"><span class="legend-box resource-box"></span> Resource (Box)</div>
+                        <div class="legend-item"><span class="legend-line alloc-line"></span> Holding / Allocation</div>
+                        <div class="legend-item"><span class="legend-line req-line"></span> Request / Waiting</div>
+                        <div class="legend-item"><span class="legend-line dead-line"></span> Deadlock Cycle</div>
+                    </div>
+                </div>
+
+                <!-- ALERTS / SAFE SEQUENCE BANNER -->
+                <div class="analysis-banner" id="analysisBanner">
+                    <div class="banner-title" id="bannerTitle">Banker's Algorithm Safe Sequence</div>
+                    <div class="banner-content" id="bannerContent">
+                        <span class="seq-tag">P1</span> ➔ <span class="seq-tag">P3</span> ➔ <span class="seq-tag">P0</span> ➔ <span class="seq-tag">P2</span> ➔ <span class="seq-tag">P4</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: MATRICES, CONTROLS & EVENT LOGS -->
+            <section class="panel controls-panel">
+                <!-- TABS -->
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="tab-matrices">📊 Matrices</button>
+                    <button class="tab-btn" data-tab="tab-actions">🎮 Operations</button>
+                    <button class="tab-btn" data-tab="tab-scenarios">📂 Scenarios</button>
+                    <button class="tab-btn" data-tab="tab-logs">📜 Audit Log</button>
+                </div>
+
+                <!-- TAB 1: MATRICES -->
+                <div class="tab-content active" id="tab-matrices">
+                    <div class="available-vector-card">
+                        <div class="card-label">Available Resources Vector [ Available ]:</div>
+                        <div class="vector-chips" id="availableVectorChips">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="matrix-table-container">
+                        <table class="matrix-table" id="matrixTable">
+                            <thead>
+                                <tr>
+                                    <th>Process</th>
+                                    <th>Allocation</th>
+                                    <th>Need / Request</th>
+                                    <th>Max Claim</th>
+                                    <th>Prio / Cost</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrixTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: OPERATIONS -->
+                <div class="tab-content" id="tab-actions">
+                    <div class="action-grid">
+                        <!-- Request Resource Card -->
+                        <div class="action-card">
+                            <h3>📥 Request Resources</h3>
+                            <div class="form-row">
+                                <label>Process:</label>
+                                <select id="reqProcessSelect"></select>
+                            </div>
+                            <div class="form-row">
+                                <label>Resource:</label>
+                                <select id="reqResourceSelect"></select>
+                            </div>
+                            <div class="form-row">
+                                <label>Units:</label>
+                                <input type="number" id="reqUnitsInput" min="1" max="10" value="1">
+                            </div>
+                            <button class="btn btn-action" id="btnSubmitRequest">Submit Request</button>
+                        </div>
+
+                        <!-- Release Resource Card -->
+                        <div class="action-card">
+                            <h3>📤 Release Resources</h3>
+                            <div class="form-row">
+                                <label>Process:</label>
+                                <select id="relProcessSelect"></select>
+                            </div>
+                            <div class="form-row">
+                                <label>Resource:</label>
+                                <select id="relResourceSelect"></select>
+                            </div>
+                            <div class="form-row">
+                                <label>Units:</label>
+                                <input type="number" id="relUnitsInput" min="1" max="10" value="1">
+                            </div>
+                            <button class="btn btn-action secondary" id="btnSubmitRelease">Release Units</button>
+                        </div>
+
+                        <!-- Engine Triggers -->
+                        <div class="action-card full-width">
+                            <h3>⚙️ Diagnostic & Recovery Engines</h3>
+                            <div class="engine-buttons">
+                                <button class="btn btn-engine" id="btnRunBanker">🔍 Banker's Check</button>
+                                <button class="btn btn-engine" id="btnRunDetection">🚨 3-Color DFS Detect</button>
+                                <button class="btn btn-engine danger" id="btnRunRecovery">💊 Cost Recovery</button>
+                            </div>
+                            <div class="form-row inline-row">
+                                <label>Victim Selection Policy:</label>
+                                <select id="victimPolicySelect">
+                                    <option value="cheapest" selected>Lowest Rollback Cost (Starvation-Aware)</option>
+                                    <option value="lowest_priority">Lowest Priority First</option>
+                                    <option value="most_resources">Reclaim Maximum Resources</option>
+                                    <option value="max_cycles">Maximum Deadlock Cycles Broken</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: PRESET SCENARIOS -->
+                <div class="tab-content" id="tab-scenarios">
+                    <div class="scenario-list">
+                        <div class="scenario-item" data-scenario="01_bankers_safe">
+                            <div class="sc-info">
+                                <h4>01. Silberschatz Benchmark (Safe Avoidance)</h4>
+                                <p>5 processes, 3 resources classic safe allocation sequence.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+
+                        <div class="scenario-item" data-scenario="02_bankers_unsafe">
+                            <div class="sc-info">
+                                <h4>02. Banker's Unsafe State Rejection</h4>
+                                <p>Simulates a dangerous request violating safety invariants.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+
+                        <div class="scenario-item" data-scenario="03_single_instance_cycle">
+                            <div class="sc-info">
+                                <h4>03. Single-Instance Circular Wait Cycle</h4>
+                                <p>3-node circular lock dependency with 3-color DFS cycle detection.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+
+                        <div class="scenario-item" data-scenario="04_multi_instance_deadlock">
+                            <div class="sc-info">
+                                <h4>04. Multi-Instance Matrix Deadlock</h4>
+                                <p>Database, AI model & Daemon competing with vector matrix reduction.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+
+                        <div class="scenario-item" data-scenario="05_starvation_recovery">
+                            <div class="sc-info">
+                                <h4>05. Havender's Resource Ordering Prevention</h4>
+                                <p>Hierarchical resource rank validation preventing hold-and-wait cycles.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+
+                        <div class="scenario-item" data-scenario="06_complex_mesh">
+                            <div class="sc-info">
+                                <h4>06. Complex Interleaved Enterprise Mesh</h4>
+                                <p>Heterogeneous multi-tier cluster with cost-based automated recovery.</p>
+                            </div>
+                            <button class="btn btn-sm btn-primary">Load</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: AUDIT LOG -->
+                <div class="tab-content" id="tab-logs">
+                    <div class="log-controls">
+                        <span>Event Stream</span>
+                        <button class="btn btn-xs" id="btnClearLogs">Clear Log</button>
+                    </div>
+                    <div class="log-stream" id="logStream">
+                        <!-- Log messages appended dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Compiled Binaries and Objects
+bin/
+build/
+*.o
+*.exe
+deadlockdoctor
+deadlocker
+shellforge
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Generated
+.DS_Store
+Thumbs.db
+*.tmp

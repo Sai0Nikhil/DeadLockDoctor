@@ -1,0 +1,27 @@
+# Scenario 02: Banker's Algorithm Unsafe Request Rejection
+MODE avoidance
+PREVENTION none
+
+RESOURCE R0 10
+RESOURCE R1 5
+RESOURCE R2 7
+
+PROCESS P0 1 1.0
+PROCESS P1 2 2.0
+PROCESS P2 3 1.5
+
+CLAIM P0 7 5 3
+CLAIM P1 3 2 2
+CLAIM P2 9 0 2
+
+REQUEST P0 0 1 0
+REQUEST P1 2 0 0
+REQUEST P2 3 0 2
+
+PRINT_STATE
+CHECK_SAFETY
+
+# Process P0 attempts to request (0, 2, 0) which would exhaust Available and leave system unsafe
+REQUEST P0 0 2 0
+
+PRINT_STATE

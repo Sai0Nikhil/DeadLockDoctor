@@ -1,0 +1,43 @@
+# Scenario 06: Complex 5x4 Process-Resource Interleaved Mesh
+MODE detection
+PREVENTION none
+VICTIM_POLICY cheapest
+
+RESOURCE CPU 4
+RESOURCE RAM 8
+RESOURCE SSD 3
+RESOURCE NIC 2
+
+PROCESS WebServer 4 50.0
+PROCESS AppServer 3 35.0
+PROCESS DBCluster 5 80.0
+PROCESS LogIndexer 1 5.0
+PROCESS Analytics 2 12.0
+
+CLAIM WebServer 2 4 1 1
+CLAIM AppServer 1 3 1 1
+CLAIM DBCluster 2 4 2 1
+CLAIM LogIndexer 1 1 1 0
+CLAIM Analytics 2 2 1 1
+
+# Initial allocation
+REQUEST WebServer 1 2 0 1
+REQUEST AppServer 1 2 1 0
+REQUEST DBCluster 2 2 1 0
+REQUEST LogIndexer 0 1 1 0
+REQUEST Analytics 0 1 0 1
+
+PRINT_STATE
+CHECK_SAFETY
+
+# Competing requests causing deadlock
+REQUEST WebServer 1 1 1 0
+REQUEST AppServer 0 1 0 1
+REQUEST DBCluster 0 2 0 1
+
+PRINT_STATE
+CHECK_DEADLOCK
+
+RECOVER
+
+PRINT_STATE

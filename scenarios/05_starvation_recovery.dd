@@ -1,0 +1,22 @@
+# Scenario 05: Havender's Resource Ordering Prevention
+MODE prevention
+PREVENTION ordering
+
+# Resources with strict rank: R0 (Rank 0) < R1 (Rank 1) < R2 (Rank 2)
+RESOURCE R0 1 0
+RESOURCE R1 1 1
+RESOURCE R2 1 2
+
+PROCESS Alpha 1 1.0
+PROCESS Beta 2 1.0
+
+CLAIM Alpha 1 1 0
+CLAIM Beta 0 1 1
+
+# Alpha acquires R0 first (Rank 0) -> Valid
+REQUEST Alpha 1 0 0
+
+# Alpha requests R1 (Rank 1 > 0) -> Valid
+REQUEST Alpha 0 1 0
+
+PRINT_STATE
