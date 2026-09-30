@@ -461,7 +461,7 @@ def generate_docx():
     add_bullet(" Extend the graph topology model to distributed multi-node clusters using Raft consensus for global deadlock coordination.", "Phase 4: Distributed Raft Deadlock Engine — ")
 
     # Save document
-    doc_path = "DeadlockDoctor_PBL_Review_Documentation.docx"
+    doc_path = "docs/reports/DeadlockDoctor_PBL_Review_Documentation.docx"
     doc.save(doc_path)
     print(f"[+] DOCX documentation generated: {doc_path}")
 

@@ -481,7 +481,7 @@ def build_presentation():
     p.font.color.rgb = RGBColor(226, 232, 240)
 
     # Save Presentation
-    output_pptx = "C:/DeadDoctor/DeadlockDoctor_Review_Presentation.pptx"
+    output_pptx = "C:/DeadDoctor/docs/reports/DeadlockDoctor_Review_Presentation.pptx"
     prs.save(output_pptx)
     print(f"[OK] Master Presentation successfully built at: {output_pptx}")
 

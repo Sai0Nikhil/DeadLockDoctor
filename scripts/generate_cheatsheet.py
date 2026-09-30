@@ -74,7 +74,7 @@ def generate_commands_docx():
             if i == 0: r.font.bold = True; r.font.color.rgb = CYAN
             if i == 1: r.font.bold = True; r.font.color.rgb = DARK
 
-    out = "DeadlockDoctor_Commands_CheatSheet.docx"
+    out = "docs/reports/DeadlockDoctor_Commands_CheatSheet.docx"
     doc.save(out)
     print(f"[+] Word Cheat Sheet generated: {out}")
 
